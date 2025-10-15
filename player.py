@@ -21,7 +21,7 @@ class Player(CircleShape):
         return [top_left, top_right, bottom_right, bottom_left]
     
     def draw(self, screen):
-        pygame.draw.polygon(screen, "white", self.square(), 2)
+        pygame.draw.polygon(screen, "red", self.square(), 2)
     
     def move_up(self, dt):
         self.position.y += PLAYER_SPEED * dt 
