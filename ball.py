@@ -16,8 +16,37 @@ class Ball(CircleShape):
         self.velocity = pygame.Vector2(2,1)
         self.starting_speed = self.velocity.length()
         self.max_speed = self.velocity.length() * 4
+        self.delay = 0
+        self.is_caught = False
+        self.owner = None
+        self.attach_offset = pygame.Vector2(0,0) # attaches to  players hand
+
+    def try_catch(self, player, catch_radius=30):
+        if self.is_caught:
+            return False
+        
+        if self.position.distance_to(player.position) <= catch_radius:
+            self.is_caught = True
+            self.owner = player
+            self.velocity.update(0,0)
+            self.attach_offset = getattr(player, "hand_offset", pygame.Vector2(0, -20))
+            self.delay = 0.0
+            return True
+        return False
+    
+    def release(self, throw_dir: pygame.Vector2, throw_speed:float):
+        if not self.is_caught:
+            return
+        if throw_dir.length_squared() == 0:
+            throw_dir = pygame.Vector2(1,0)
+        self.velocity = throw_dir.normalize() * min(throw_speed, self.max_speed)
+        self.starting_speed = max(self.starting_speed, self.velocity.length())
+        self.is_caught = False
+        self.owner = None
+        self.delay = 0.0
 
     def draw(self, screen):
+
         current_speed = self.velocity.length()
         if current_speed >= self.max_speed:
             color = "orange"
@@ -28,13 +57,21 @@ class Ball(CircleShape):
         pygame.draw.circle(screen, color, self.position, self.radius)   
 
     def update(self, dt):
-        if self.velocity.length() > self.starting_speed:
+        if self.is_caught and self.owner is not None:
+            # attachs the ball to player
+            self.position = self.owner.position + self.attach_offset
+            return
+        
+        self.delay += dt 
+
+        if self.velocity.length() > self.starting_speed and self.delay > 2.0: # start lossing speed after not touching a wall or player after 2 seconds
             self.velocity *= 0.999
 
         self.position += self.velocity
             
         if self.position.x <= self.radius or self.position.x >= SCREEN_WIDTH - self.radius:
             self.velocity.x *= -1 # this causes the ball to bounce back
+            self.delay = 0 # resets delay timer on bounce
             if self.velocity.length() < self.max_speed:
                 self.velocity *= 2 # increases speed on bounce as long is under the speed limit
                 if self.velocity.length() > self.max_speed:
@@ -43,6 +80,7 @@ class Ball(CircleShape):
 
         if self.position.y <= self.radius or self.position.y >= SCREEN_HEIGHT - self.radius:
             self.velocity.y *= -1
+            self.delay = 0
             if self.velocity.length() < self.max_speed:
                 self.velocity *= 2
                 if self.velocity.length() > self.max_speed:

@@ -15,7 +15,8 @@ def main():
     Player.containers = (updatable, drawable)
     
 
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
+    player.ball = ball
 
     dt = 0
 
@@ -34,7 +35,16 @@ def main():
 
         dt = clock.tick(60)/ 1000
 
-        
+        # logic to keep player from going off bounds
+        if player.position.x > SCREEN_WIDTH:
+            player.position.x = SCREEN_WIDTH
+        elif player.position.x < 0:
+            player.position.x = 0
+
+        if player.position.y > SCREEN_HEIGHT:
+            player.position.y = SCREEN_HEIGHT
+        elif player.position.y < 0:
+            player.position.y = 0
         
     
 
