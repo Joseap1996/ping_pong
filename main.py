@@ -4,6 +4,8 @@ from constants import *
 from player import Player
 from ball import Ball
 
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -19,8 +21,10 @@ def main():
     player.ball = ball
 
     dt = 0
+    
 
     while True:
+        catching = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
@@ -28,6 +32,8 @@ def main():
         updatable.update(dt)
         screen.fill("black")
         ball.update(dt)
+        ball.handle_collision(player, catching)
+
         ball.draw(screen)
         for obj in drawable:
             obj.draw(screen)
@@ -41,12 +47,7 @@ def main():
         elif player.position.x < 0:
             player.position.x = 0
 
-        if player.position.y > SCREEN_HEIGHT:
-            player.position.y = SCREEN_HEIGHT
-        elif player.position.y < 0:
-            player.position.y = 0
         
-    
 
 if __name__ == "__main__":
     main()

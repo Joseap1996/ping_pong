@@ -37,7 +37,7 @@ class Player(CircleShape):
         self.position.x -= PLAYER_SPEED * dt
     
     def update(self, dt):
-        incoming = self.velocity
+        incoming = self.ball.velocity
         if incoming.length_squared() == 0:
             incoming = pygame.Vector2(0, -1)
         throw_dir = incoming.normalize() # for now this sets the direction for the ball back after being released

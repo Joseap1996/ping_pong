@@ -55,6 +55,49 @@ class Ball(CircleShape):
         else:
             color = "white"
         pygame.draw.circle(screen, color, self.position, self.radius)   
+    
+    def player_rect(self, player):
+        half = player.radius
+        return pygame.Rect(
+            int(player.position.x - half),
+            int(player.position.y - half),
+            int(2 * half),
+            int(2 * half),
+        )
+    
+    def handle_collision(self, player, catching:bool):
+        rect = self.player_rect(player)
+
+        nx = max(rect.left, min(self.position.x, rect.right))
+        ny = max(rect.top,  min(self.position.y, rect.bottom))
+        nearest = pygame.Vector2(nx, ny)
+
+        to_center = self.position - nearest
+        dist_sq = to_center.length_squared()
+        if dist_sq > self.radius * self.radius:
+            return  # no collision
+
+        if catching:
+            self.try_catch(player)
+            return
+        if dist_sq == 0:
+        # center is exactly on an edge/corner: choose axis by smallest penetration
+            dx_left = abs(self.position.x - rect.left)
+            dx_right = abs(self.position.x - rect.right)
+            dy_top = abs(self.position.y - rect.top)
+            dy_bottom = abs(self.position.y - rect.bottom)
+            if min(dx_left, dx_right) < min(dy_top, dy_bottom):
+                normal = pygame.Vector2(1 if dx_left < dx_right else -1, 0)
+            else:
+                normal = pygame.Vector2(0, 1 if dy_top < dy_bottom else -1)
+        else:
+            normal = to_center.normalize()
+        v = self.velocity
+        self.velocity = v - 2 * v.dot(normal) * normal
+
+        self.position = nearest + normal * (self.radius + 0.1)
+
+        self.delay = 0.0
 
     def update(self, dt):
         if self.is_caught and self.owner is not None:
