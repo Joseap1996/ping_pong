@@ -15,7 +15,7 @@ class Ball(CircleShape):
         super().__init__(x, y, BALL_RADIUS)
         self.velocity = pygame.Vector2(2,1)
         self.starting_speed = self.velocity.length()
-        self.max_speed = self.velocity.length() * 4
+        self.max_speed = self.velocity.length() * 10
         self.delay = 0
         self.is_caught = False
         self.owner = None
@@ -74,24 +74,32 @@ class Ball(CircleShape):
 
         to_center = self.position - nearest
         dist_sq = to_center.length_squared()
-        if dist_sq > self.radius * self.radius:
-            return  # no collision
+        r = self.radius
+        if dist_sq > r * r:
+            return
 
         if catching:
             self.try_catch(player)
             return
+        
         if dist_sq == 0:
-        # center is exactly on an edge/corner: choose axis by smallest penetration
-            dx_left = abs(self.position.x - rect.left)
-            dx_right = abs(self.position.x - rect.right)
-            dy_top = abs(self.position.y - rect.top)
-            dy_bottom = abs(self.position.y - rect.bottom)
-            if min(dx_left, dx_right) < min(dy_top, dy_bottom):
-                normal = pygame.Vector2(1 if dx_left < dx_right else -1, 0)
-            else:
-                normal = pygame.Vector2(0, 1 if dy_top < dy_bottom else -1)
+            # pick axis by smaller penetration
+            dx = min(abs(self.position.x - rect.left), abs(self.position.x - rect.right))
+            dy = min(abs(self.position.y - rect.top),  abs(self.position.y - rect.bottom))
+            normal = pygame.Vector2(1, 0) if dx < dy else pygame.Vector2(0, 1)
+            # orient normal outward from rect center
+            rc = pygame.Vector2(rect.center)
+            if (self.position - rc).dot(normal) < 0:
+                normal *= -1
+            pen = r  # fully inside at a corner/edge
         else:
-            normal = to_center.normalize()
+            dist = dist_sq ** 0.5
+            normal = to_center / dist
+            pen = r - dist  # how much we’re overlapping
+
+        epsilon = 0.5
+        self.position += normal * (pen + epsilon)
+
         v = self.velocity
         self.velocity = v - 2 * v.dot(normal) * normal
 

@@ -1,11 +1,11 @@
-SCREEN_WIDTH = 720
+SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 1280
 
-PLAYER_RADIUS = 10 ## size and shape to be determined
+PLAYER_RADIUS = 30 ## size and shape to be determined
 
 GOAL1_WIDTH = 100
 GOAL2_WIDTH = 100
 
-BALL_RADIUS = 5
+BALL_RADIUS = 10
 
 PLAYER_SPEED = 500
