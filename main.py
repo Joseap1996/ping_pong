@@ -14,16 +14,23 @@ def main():
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
-    ball = Ball(100, 100)
+
     Player.containers = (updatable, drawable)
-    GameCourt.containers = (drawable)
-    game_court = GameCourt()
+    GameCourt.containers = (drawable,)
+
+    my_game_court = GameCourt()
+
+    my_ball = Ball(
+        x=my_game_court.game_court.centerx,
+        y=my_game_court.game_court.centery,
+        game_court_rect=my_game_court.game_court
+    )
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
-    player.ball = ball
+    player.ball = my_ball
 
     dt = 0
-    
+    border_w = 2
 
     while True:
         catching = False
@@ -31,31 +38,30 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
-        
+        #UPDATE
         updatable.update(dt)
-        screen.fill("black")
-        game_court.draw(screen)
-        ball.update(dt)
-        ball.handle_collision(player, catching)
-
-        ball.draw(screen)
-        for obj in drawable:
-            obj.draw(screen)
-        pygame.display.flip()
-
-        dt = clock.tick(60)/ 1000
+        my_ball.update(dt)
+        my_ball.handle_collision(player, catching)
+        
+        #CLAMP PLAYER BEFORE DRAW
+        left = my_game_court.game_court.left + player.radius + border_w
+        right = my_game_court.game_court.right - player.radius - border_w
+        top = my_game_court.game_court.top + player.radius + border_w
+        bottom = my_game_court.game_court.bottom - player.radius - border_w
 
         # logic to keep player from going off bounds
-        if player.position.x + player.radius > SCREEN_WIDTH:
-            player.position.x = SCREEN_WIDTH - player.radius
-        elif player.position.x - player.radius < 0:
-            player.position.x = player.radius
-        
-        if player.position.y + player.radius > SCREEN_HEIGHT:
-            player.position.y = SCREEN_HEIGHT - player.radius
-        elif player.position.y - player.radius < 0:
-            player.position.y = player.radius
-        
+        player.position.x = max(left, min(player.position.x, right))
+        player.position.y = max(top, min(player.position.y, bottom))
+
+        #DRAW
+        screen.fill("black")
+        my_game_court.draw(screen)
+        my_ball.draw(screen)
+        for obj in drawable:
+            obj.draw(screen)
+
+        pygame.display.flip()
+        dt = clock.tick(60)/ 1000
 
 if __name__ == "__main__":
     main()

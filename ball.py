@@ -10,8 +10,9 @@
 import pygame
 from circle_shape import CircleShape
 from constants import *
+from game_court import GameCourt
 class Ball(CircleShape):
-    def __init__(self, x, y):
+    def __init__(self, x, y, game_court_rect):
         super().__init__(x, y, BALL_RADIUS)
         self.velocity = pygame.Vector2(2,1)
         self.starting_speed = self.velocity.length()
@@ -20,6 +21,7 @@ class Ball(CircleShape):
         self.is_caught = False
         self.owner = None
         self.attach_offset = pygame.Vector2(0,0) # attaches to  players hand
+        self.game_court = game_court_rect
 
     def try_catch(self, player, catch_radius=30):
         if self.is_caught:
@@ -119,8 +121,12 @@ class Ball(CircleShape):
             self.velocity *= 0.999
 
         self.position += self.velocity
-            
-        if self.position.x <= self.radius or self.position.x >= SCREEN_WIDTH - self.radius:
+        left = self.game_court.left + self.radius
+        right = self.game_court.right - self.radius
+        top = self.game_court.top + self.radius
+        bottom = self.game_court.bottom - self.radius
+
+        if self.position.x <= left or self.position.x >= right:
             self.velocity.x *= -1 # this causes the ball to bounce back
             self.delay = 0 # resets delay timer on bounce
             if self.velocity.length() < self.max_speed:
@@ -129,7 +135,9 @@ class Ball(CircleShape):
                     direction = self.velocity.normalize()
                     self.velocity = direction * self.max_speed #speed cap after boost
 
-        if self.position.y <= self.radius or self.position.y >= SCREEN_HEIGHT - self.radius:
+            self.position.x = max(left, min(self.position.x, right))
+
+        if self.position.y <= top or self.position.y >= bottom:
             self.velocity.y *= -1
             self.delay = 0
             if self.velocity.length() < self.max_speed:
@@ -137,5 +145,5 @@ class Ball(CircleShape):
                 if self.velocity.length() > self.max_speed:
                     direction = self.velocity.normalize()
                     self.velocity = direction * self. max_speed
-            
+            self.position.y = max(top, min(self.position.y, bottom))    
                 
