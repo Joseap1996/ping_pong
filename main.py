@@ -27,6 +27,7 @@ def main():
     )
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
+    player2 = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 1000)
     player.ball = my_ball
 
     dt = 0
@@ -42,7 +43,27 @@ def main():
         updatable.update(dt)
         my_ball.update(dt)
         my_ball.handle_collision(player, catching)
+        my_ball.handle_collision(player2, catching)
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_a]:
+            player.move_left(dt)
+        if keys[pygame.K_d]:
+            player.move_right(dt)
+        if keys[pygame.K_w]:
+            player.move_up(dt)
+        if keys[pygame.K_s]:
+            player.move_down(dt)
         
+        if keys[pygame.K_KP4]:
+            player2.move_left(dt)
+        if keys[pygame.K_KP6]:
+            player2.move_right(dt)
+        if keys[pygame.K_KP8]:
+            player2.move_up(dt)
+        if keys[pygame.K_KP5]:
+            player2.move_down(dt)
+
         #CLAMP PLAYER BEFORE DRAW
         left = my_game_court.game_court.left + player.radius + border_w
         right = my_game_court.game_court.right - player.radius - border_w
@@ -52,6 +73,10 @@ def main():
         # logic to keep player from going off bounds
         player.position.x = max(left, min(player.position.x, right))
         player.position.y = max(top, min(player.position.y, bottom))
+        player2.position.x = max(left, min(player2.position.x, right))
+        player2.position.y = max(top, min(player2.position.y, bottom))
+
+        
 
         #DRAW
         screen.fill("black")

@@ -37,23 +37,6 @@ class Player(CircleShape):
         self.position.x -= PLAYER_SPEED * dt
     
     def update(self, dt):
-        incoming = self.ball.velocity
-        if incoming.length_squared() == 0:
-            incoming = pygame.Vector2(0, -1)
-        throw_dir = incoming.normalize() # for now this sets the direction for the ball back after being released
-
-        keys = pygame.key.get_pressed()
         self.timer -= dt
 
-        if keys[pygame.K_a]:
-            self.move_left(dt)
-        if keys[pygame.K_d]:
-            self.move_right(dt)
-        if keys[pygame.K_w]:
-            self.move_up(dt)
-        if keys[pygame.K_s]:
-            self.move_down(dt)
-        if keys[pygame.K_SPACE]:
-            self.ball.try_catch(self)
-        if keys[pygame.K_j]:
-            self.ball.release(throw_dir, throw_speed = 100)
+       
