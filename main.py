@@ -17,13 +17,16 @@ def main():
 
     Player.containers = (updatable, drawable)
     GameCourt.containers = (drawable,)
+    Ball.containers = (updatable, drawable)
 
     my_game_court = GameCourt()
 
     my_ball = Ball(
         x=my_game_court.game_court.centerx,
         y=my_game_court.game_court.centery,
-        game_court_rect=my_game_court.game_court
+        game_court_rect=my_game_court.game_court,
+        goal1_rect=my_game_court.goal1,
+        goal2_rect=my_game_court.goal2
     )
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
@@ -41,7 +44,7 @@ def main():
                 return
         #UPDATE
         updatable.update(dt)
-        my_ball.update(dt)
+        
         my_ball.handle_collision(player, catching)
         my_ball.handle_collision(player2, catching)
         keys = pygame.key.get_pressed()
@@ -81,7 +84,7 @@ def main():
         #DRAW
         screen.fill("black")
         my_game_court.draw(screen)
-        my_ball.draw(screen)
+        
         for obj in drawable:
             obj.draw(screen)
 

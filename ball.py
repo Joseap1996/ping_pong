@@ -12,7 +12,7 @@ from circle_shape import CircleShape
 from constants import *
 from game_court import GameCourt
 class Ball(CircleShape):
-    def __init__(self, x, y, game_court_rect):
+    def __init__(self, x, y, game_court_rect,goal1_rect,goal2_rect):
         super().__init__(x, y, BALL_RADIUS)
         self.velocity = pygame.Vector2(2,1)
         self.starting_speed = self.velocity.length()
@@ -22,6 +22,8 @@ class Ball(CircleShape):
         self.owner = None
         self.attach_offset = pygame.Vector2(0,0) # attaches to  players hand
         self.game_court = game_court_rect
+        self.goal1 = goal1_rect
+        self.goal2 = goal2_rect
 
     def try_catch(self, player, catch_radius=30):
         if self.is_caught:
@@ -107,7 +109,7 @@ class Ball(CircleShape):
 
         self.position = nearest + normal * (self.radius + 0.1)
 
-        self.delay = 0.0
+        self.delay = 0
 
     def update(self, dt):
         if self.is_caught and self.owner is not None:
@@ -121,10 +123,24 @@ class Ball(CircleShape):
             self.velocity *= 0.999
 
         self.position += self.velocity
+        #game court walls
         left = self.game_court.left + self.radius
         right = self.game_court.right - self.radius
         top = self.game_court.top + self.radius
         bottom = self.game_court.bottom - self.radius
+        #goal walls
+        goal1_left = self.goal1.left + self.radius
+        goal1_right = self.goal1.right - self.radius
+        goal1_top = self.goal1.top + self.radius
+        goal1_bottom = self.goal1.bottom - self.radius
+
+        goal2_left = self.goal2.left + self.radius
+        goal2_right = self.goal2.right - self.radius
+        goal2_top = self.goal2.top + self.radius
+        goal2_bottom = self.goal2.bottom - self.radius
+
+        in_goal1_x = goal1_left <= self.position.x <= goal1_right
+        in_goal2_x = goal2_left <= self.position.x <= goal2_right
 
         if self.position.x <= left or self.position.x >= right:
             self.velocity.x *= -1 # this causes the ball to bounce back
@@ -138,12 +154,31 @@ class Ball(CircleShape):
             self.position.x = max(left, min(self.position.x, right))
 
         if self.position.y <= top or self.position.y >= bottom:
-            self.velocity.y *= -1
-            self.delay = 0
-            if self.velocity.length() < self.max_speed:
-                self.velocity *= 2
-                if self.velocity.length() > self.max_speed:
-                    direction = self.velocity.normalize()
-                    self.velocity = direction * self. max_speed
-            self.position.y = max(top, min(self.position.y, bottom))    
+            #checking for ball going in the goal
+            if (self.position.y >= goal1_top and self.position.y <= top and in_goal1_x and self.velocity.y < 0):
+                print("GOAL 1 CONDITION MET")
+                pass
+            elif (self.position.y >= bottom and self.position.y <= goal2_bottom and in_goal2_x and self.velocity.y > 0):
+                print("GOAL 2 CONDITION MET")
+                pass
+            else:
                 
+                print("BOUNCING")
+                self.velocity.y *= -1
+                self.delay = 0
+                if self.velocity.length() < self.max_speed:
+                    self.velocity *= 2
+                    if self.velocity.length() > self.max_speed:
+                        direction = self.velocity.normalize()
+                        self.velocity = direction * self. max_speed
+                self.position.y = max(top, min(self.position.y, bottom))
+            
+        if self.position.y < top or self.position.y > bottom:
+    # Ball is outside court bounds
+            if in_goal1_x:
+                print("GOAL 1 SCORED!")
+                self.kill()
+            elif in_goal2_x:
+                print("GOAL 2 SCORED!")
+                self.kill()
+
