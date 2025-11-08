@@ -18,6 +18,9 @@ class Ball(CircleShape):
         self.starting_speed = self.velocity.length()
         self.max_speed = self.velocity.length() * 10
         self.delay = 0
+        self.countdown = 0
+        self.countdown_timer = 0
+        self.scorer = None
         self.is_caught = False
         self.owner = None
         self.attach_offset = pygame.Vector2(0,0) # attaches to  players hand
@@ -48,6 +51,16 @@ class Ball(CircleShape):
         self.is_caught = False
         self.owner = None
         self.delay = 0.0
+
+    def draw_countdown(self, screen, font):
+        if self.countdown > 0:
+            if self.countdown == 3:
+                text = font.render(f"{self.scorer} Scores!", True, "yellow")
+            else:
+                text = font.render(str(self.countdown), True, "white")
+
+            text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+            screen.blit(text, text_rect)
 
     def draw(self, screen):
 
@@ -110,8 +123,36 @@ class Ball(CircleShape):
         self.position = nearest + normal * (self.radius + 0.1)
 
         self.delay = 0
+    
+    def reset(self, scorer):
+        self.position = pygame.Vector2(
+            self.game_court.centerx,
+            self.game_court.centery
+        )
+        self.velocity = pygame.Vector2(0,0)
+        self.countdown = 3
+        self.countdown_timer = 0
+        self.scorer = scorer
+        self.is_caught = False
+        self.owner = None   
+
 
     def update(self, dt):
+        if self.countdown > 0:
+            self.countdown_timer += dt
+            if self.countdown_timer >= 1.0:
+                self.countdown -= 1
+                self.countdown_timer = 0
+                print(f"Starting in {self.countdown}")
+
+                if self.countdown == 0:
+                    if self.scorer == "Player 1":
+                        self.velocity = pygame.Vector2(2, -1)
+                    elif self.scorer == "Player 2":
+                        self.velocity = pygame.Vector2(2, 1)
+            return
+
+
         if self.is_caught and self.owner is not None:
             # attachs the ball to player
             self.position = self.owner.position + self.attach_offset
@@ -156,14 +197,16 @@ class Ball(CircleShape):
         if self.position.y <= top or self.position.y >= bottom:
             #checking for ball going in the goal
             if (self.position.y >= goal1_top and self.position.y <= top and in_goal1_x and self.velocity.y < 0):
-                print("GOAL 1 CONDITION MET")
+                print("Player 1 scored!")
+                scorer = "Player1"
+                self.reset(scorer)
                 pass
             elif (self.position.y >= bottom and self.position.y <= goal2_bottom and in_goal2_x and self.velocity.y > 0):
-                print("GOAL 2 CONDITION MET")
+                print("Player 2 scored!")
+                scorer = "Player2"
+                self.reset(scorer)
                 pass
             else:
-                
-                print("BOUNCING")
                 self.velocity.y *= -1
                 self.delay = 0
                 if self.velocity.length() < self.max_speed:
@@ -173,12 +216,5 @@ class Ball(CircleShape):
                         self.velocity = direction * self. max_speed
                 self.position.y = max(top, min(self.position.y, bottom))
             
-        if self.position.y < top or self.position.y > bottom:
-    # Ball is outside court bounds
-            if in_goal1_x:
-                print("GOAL 1 SCORED!")
-                self.kill()
-            elif in_goal2_x:
-                print("GOAL 2 SCORED!")
-                self.kill()
-
+        
+    
