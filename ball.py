@@ -11,8 +11,10 @@ import pygame
 from circle_shape import CircleShape
 from constants import *
 from game_court import GameCourt
+from scoreboard import ScoreBoard
+
 class Ball(CircleShape):
-    def __init__(self, x, y, game_court_rect,goal1_rect,goal2_rect):
+    def __init__(self, x, y, game_court_rect,goal1_rect,goal2_rect, score_board):
         super().__init__(x, y, BALL_RADIUS)
         self.velocity = pygame.Vector2(2,1)
         self.starting_speed = self.velocity.length()
@@ -27,6 +29,7 @@ class Ball(CircleShape):
         self.game_court = game_court_rect
         self.goal1 = goal1_rect
         self.goal2 = goal2_rect
+        self.score_board = score_board
 
     def try_catch(self, player, catch_radius=30):
         if self.is_caught:
@@ -198,13 +201,16 @@ class Ball(CircleShape):
             #checking for ball going in the goal
             if (self.position.y >= goal1_top and self.position.y <= top and in_goal1_x and self.velocity.y < 0):
                 print("Player 1 scored!")
-                scorer = "Player1"
+                scorer = "Player 1"
                 self.reset(scorer)
+                self.score_board.score_p1()
+                print("P1 score now:", self.score_board.p1_score)
                 pass
             elif (self.position.y >= bottom and self.position.y <= goal2_bottom and in_goal2_x and self.velocity.y > 0):
                 print("Player 2 scored!")
-                scorer = "Player2"
+                scorer = "Player 2"
                 self.reset(scorer)
+                self.score_board.score_p2()
                 pass
             else:
                 self.velocity.y *= -1

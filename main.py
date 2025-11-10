@@ -4,6 +4,7 @@ from constants import *
 from player import Player
 from ball import Ball
 from game_court import GameCourt
+from scoreboard import ScoreBoard
 
 
 
@@ -19,16 +20,19 @@ def main():
 
     Player.containers = (updatable, drawable)
     GameCourt.containers = (drawable,)
+    ScoreBoard.containers = (drawable,)
     Ball.containers = (updatable, drawable)
 
     my_game_court = GameCourt()
+    score_board = ScoreBoard(game_court_rect=my_game_court.game_court)
 
     my_ball = Ball(
         x=my_game_court.game_court.centerx,
         y=my_game_court.game_court.centery,
         game_court_rect=my_game_court.game_court,
         goal1_rect=my_game_court.goal1,
-        goal2_rect=my_game_court.goal2
+        goal2_rect=my_game_court.goal2,
+        score_board=score_board
     )
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
@@ -86,11 +90,14 @@ def main():
         #DRAW
         screen.fill("black")
         my_game_court.draw(screen)
+       
         
         for obj in drawable:
             obj.draw(screen)
-        
+
+        score_board.draw(screen)
         my_ball.draw_countdown(screen, font)
+        
 
         pygame.display.flip()
         dt = clock.tick(60)/ 1000
