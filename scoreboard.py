@@ -23,7 +23,7 @@ class ScoreBoard(pygame.sprite.Sprite):
             self.p2_score += amount
     
     def draw(self,screen):
-        pygame.draw.rect(screen, "black", self.score_board)
+        pygame.draw.rect(screen, "teal", self.score_board)
         pygame.draw.rect(screen, "white", self.score_board, 2)
 
         p1_text = self.font.render(str(self.p1_score), True, (255, 255, 255))

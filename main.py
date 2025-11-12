@@ -12,7 +12,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-
+    gray = (102, 102, 102) #screen color
 
     font = pygame.font.Font(None, 74) 
     updatable = pygame.sprite.Group()
@@ -48,9 +48,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+            
+            if my_ball.pause:
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_SPACE, pygame.K_RETURN):
+                        my_ball.pause = False
+                    elif event.key in (pygame.K_q, pygame.K_ESCAPE):
+                        return
+
         #UPDATE
-        updatable.update(dt)
-        
+        if not my_ball.pause:
+            updatable.update(dt)
+        else:
+            pass
         my_ball.handle_collision(player, catching)
         my_ball.handle_collision(player2, catching)
         keys = pygame.key.get_pressed()
@@ -88,7 +98,7 @@ def main():
         
 
         #DRAW
-        screen.fill("black")
+        screen.fill(gray)
         my_game_court.draw(screen)
        
         
@@ -98,6 +108,14 @@ def main():
         score_board.draw(screen)
         my_ball.draw_countdown(screen, font)
         
+        if my_ball.pause:
+            overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+            overlay.fill((0,0,0,160))
+            screen.blit(overlay, (0,0))
+            msg = font.render("Goal! Press SPACE to continue or Q/Esc to quit", True, (255,255,255))
+            msg_rect = msg.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            screen.blit(msg, msg_rect)
+
 
         pygame.display.flip()
         dt = clock.tick(60)/ 1000

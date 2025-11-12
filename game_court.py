@@ -19,8 +19,12 @@ class GameCourt(pygame.sprite.Sprite):
         self.goal2 = pygame.Rect(goal_x, self.game_court.bottom, goal_width, goal_height) 
         
     def draw(self, screen):
-        pygame.draw.rect(screen, "blue", self.goal1, 2)
-        pygame.draw.rect(screen, "blue", self.goal2, 2)
+        dark_green = (31, 96, 31)
+        pygame.draw.rect(screen, dark_green, self.goal1)
+        pygame.draw.rect(screen, "blue", self.goal1, 4)
+        pygame.draw.rect(screen, dark_green, self.goal2)
+        pygame.draw.rect(screen, "blue", self.goal2, 4)
+        pygame.draw.rect(screen, dark_green, self.game_court)
         pygame.draw.rect(screen, "white", self.game_court, 2)
         
 

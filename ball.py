@@ -22,6 +22,7 @@ class Ball(CircleShape):
         self.delay = 0
         self.countdown = 0
         self.countdown_timer = 0
+        self.pause = False 
         self.scorer = None
         self.is_caught = False
         self.owner = None
@@ -141,6 +142,9 @@ class Ball(CircleShape):
 
 
     def update(self, dt):
+        if self.pause:
+            return
+        
         if self.countdown > 0:
             self.countdown_timer += dt
             if self.countdown_timer >= 1.0:
@@ -202,13 +206,14 @@ class Ball(CircleShape):
             if (self.position.y >= goal1_top and self.position.y <= top and in_goal1_x and self.velocity.y < 0):
                 print("Player 1 scored!")
                 scorer = "Player 1"
+                self.pause =  True
                 self.reset(scorer)
                 self.score_board.score_p1()
-                print("P1 score now:", self.score_board.p1_score)
                 pass
             elif (self.position.y >= bottom and self.position.y <= goal2_bottom and in_goal2_x and self.velocity.y > 0):
                 print("Player 2 scored!")
                 scorer = "Player 2"
+                self.pause = True
                 self.reset(scorer)
                 self.score_board.score_p2()
                 pass
