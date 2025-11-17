@@ -1,4 +1,7 @@
-import sys
+import os, sys
+if "microsoft" in sys.platform or os.environ.get("WSL_DISTRO_NAME"):
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
+
 import pygame
 from constants import *
 from player import Player
@@ -9,10 +12,16 @@ from scoreboard import ScoreBoard
 
 
 def main():
+    pygame.mixer.quit()
+    pygame.mixer.init(44100, -16, 2, 128)
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     gray = (102, 102, 102) #screen color
+    game_state = "start"
+    base = os.path.dirname(__file__)
+    wav_path = os.path.join(base,"assets","bounce_sound.wav")
+    
 
     font = pygame.font.Font(None, 74) 
     updatable = pygame.sprite.Group()
@@ -32,7 +41,8 @@ def main():
         game_court_rect=my_game_court.game_court,
         goal1_rect=my_game_court.goal1,
         goal2_rect=my_game_court.goal2,
-        score_board=score_board
+        score_board=score_board,
+        wav_path=wav_path
     )
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
@@ -48,19 +58,26 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
-            
-            if my_ball.pause:
+            if game_state == "start":
                 if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_SPACE, pygame.K_RETURN):
+                        game_state = "playing"
+                        
+                    elif event.key in (pygame.K_q, pygame.K_ESCAPE):
+                        return
+            elif game_state == "playing":
+                if event.type == pygame.KEYDOWN and my_ball.pause:
                     if event.key in (pygame.K_SPACE, pygame.K_RETURN):
                         my_ball.pause = False
                     elif event.key in (pygame.K_q, pygame.K_ESCAPE):
                         return
 
         #UPDATE
-        if not my_ball.pause:
+        if game_state == "playing" and not my_ball.pause:
             updatable.update(dt)
         else:
             pass
+
         my_ball.handle_collision(player, catching)
         my_ball.handle_collision(player2, catching)
         keys = pygame.key.get_pressed()
@@ -107,8 +124,18 @@ def main():
 
         score_board.draw(screen)
         my_ball.draw_countdown(screen, font)
+
         
-        if my_ball.pause:
+        if game_state == "start":
+            overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+            overlay.fill((0,0,0,200))
+            screen.blit(overlay,(0,0))
+            title = font.render("GAME START", True, (255,255,255))
+            prompt = font.render("Press SPACE to start", True, (255,255,255))
+            screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
+            screen.blit(prompt, prompt.get_rect(center=(SCREEN_WIDTH // 2 , SCREEN_HEIGHT // 2 + 20)))
+        
+        elif my_ball.pause:
             overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
             overlay.fill((0,0,0,160))
             screen.blit(overlay, (0,0))

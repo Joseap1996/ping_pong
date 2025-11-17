@@ -6,7 +6,6 @@
 # ball speed and angle will change depending on the player action 
 # ball will be either be caught or struck back by player to be determined later...
 # ball will be a circle from CircleShap and be blue
-
 import pygame
 from circle_shape import CircleShape
 from constants import *
@@ -14,7 +13,7 @@ from game_court import GameCourt
 from scoreboard import ScoreBoard
 
 class Ball(CircleShape):
-    def __init__(self, x, y, game_court_rect,goal1_rect,goal2_rect, score_board):
+    def __init__(self, x, y, game_court_rect,goal1_rect,goal2_rect, score_board, wav_path):
         super().__init__(x, y, BALL_RADIUS)
         self.velocity = pygame.Vector2(2,1)
         self.starting_speed = self.velocity.length()
@@ -31,7 +30,9 @@ class Ball(CircleShape):
         self.goal1 = goal1_rect
         self.goal2 = goal2_rect
         self.score_board = score_board
-
+        self.bounce_sound = pygame.mixer.Sound(wav_path)
+        
+        
     def try_catch(self, player, catch_radius=30):
         if self.is_caught:
             return False
@@ -192,6 +193,7 @@ class Ball(CircleShape):
 
         if self.position.x <= left or self.position.x >= right:
             self.velocity.x *= -1 # this causes the ball to bounce back
+            pygame.mixer.Sound.play(self.bounce_sound) # sound effect for ball bouncing off walls
             self.delay = 0 # resets delay timer on bounce
             if self.velocity.length() < self.max_speed:
                 self.velocity *= 2 # increases speed on bounce as long is under the speed limit
@@ -219,6 +221,7 @@ class Ball(CircleShape):
                 pass
             else:
                 self.velocity.y *= -1
+                pygame.mixer.Sound.play(self.bounce_sound)
                 self.delay = 0
                 if self.velocity.length() < self.max_speed:
                     self.velocity *= 2
