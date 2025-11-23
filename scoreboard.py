@@ -21,7 +21,10 @@ class ScoreBoard(pygame.sprite.Sprite):
             self.p1_score += amount
     def score_p2(self, amount=1):
             self.p2_score += amount
-    
+    def reset(self):
+          self.p1_score = 0
+          self.p2_score = 0
+          
     def draw(self,screen):
         pygame.draw.rect(screen, "teal", self.score_board)
         pygame.draw.rect(screen, "white", self.score_board, 2)

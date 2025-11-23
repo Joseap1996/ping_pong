@@ -1,5 +1,5 @@
 import os, sys
-if "microsoft" in sys.platform or os.environ.get("WSL_DISTRO_NAME"):
+if "microsoft" in sys.platform or os.environ.get("WSL_DISTRO_NAME"): # this for testing my logic in wsl because sound does not work in it
     os.environ["SDL_AUDIODRIVER"] = "dummy"
 
 import pygame
@@ -71,12 +71,22 @@ def main():
                         my_ball.pause = False
                     elif event.key in (pygame.K_q, pygame.K_ESCAPE):
                         return
-
+            elif game_state == "end":
+                if event.type == pygame.KEYDOWN:
+                    if event.key in (pygame.K_SPACE, pygame.K_RETURN):
+                        game_state = "playing"
+                        score_board.reset()
+                        my_ball.reset(None)
+                        my_ball.pause = False
+                    
+                    elif event.key in (pygame.K_q, pygame.K_ESCAPE):
+                        return
         #UPDATE
         if game_state == "playing" and not my_ball.pause:
             updatable.update(dt)
         else:
             pass
+
 
         my_ball.handle_collision(player, catching)
         my_ball.handle_collision(player2, catching)
@@ -112,7 +122,9 @@ def main():
         player2.position.x = max(left, min(player2.position.x, right))
         player2.position.y = max(top, min(player2.position.y, bottom))
 
-        
+        if score_board.p1_score >= 6 or score_board.p2_score >= 6:
+            game_state = "end"
+            my_ball.pause = True
 
         #DRAW
         screen.fill(gray)
@@ -135,6 +147,15 @@ def main():
             screen.blit(title, title.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
             screen.blit(prompt, prompt.get_rect(center=(SCREEN_WIDTH // 2 , SCREEN_HEIGHT // 2 + 20)))
         
+        elif game_state == "end":
+            overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+            overlay.fill((0,0,0,200))
+            screen.blit(overlay,(0,0))
+            msg = font.render("Max score reached, GAME OVER", True, (255,255,255))
+            msg2 = font.render("Press SPACE to play again or q/Esc to quit", True, (255,255,255))
+            screen.blit(msg, msg.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40)))
+            screen.blit(msg2, msg2.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20)))
+
         elif my_ball.pause:
             overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
             overlay.fill((0,0,0,160))
@@ -142,7 +163,6 @@ def main():
             msg = font.render("Goal! Press SPACE to continue or Q/Esc to quit", True, (255,255,255))
             msg_rect = msg.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             screen.blit(msg, msg_rect)
-
 
         pygame.display.flip()
         dt = clock.tick(60)/ 1000

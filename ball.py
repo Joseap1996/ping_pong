@@ -155,9 +155,11 @@ class Ball(CircleShape):
 
                 if self.countdown == 0:
                     if self.scorer == "Player 1":
-                        self.velocity = pygame.Vector2(2, -1)
+                        self.velocity = pygame.Vector2(2, -1) # sends the ball to player 2 for being scored on
                     elif self.scorer == "Player 2":
-                        self.velocity = pygame.Vector2(2, 1)
+                        self.velocity = pygame.Vector2(2, 1) # sends the ball to player 1 for being scored on
+                    else:
+                        self.velocity = pygame.Vector2(1, -1) # place holder ball direction after reset
             return
 
 
