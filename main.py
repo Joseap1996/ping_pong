@@ -46,7 +46,7 @@ def main():
     )
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)
-    player2 = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 1000)
+    player2 = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 1200)
     player.ball = my_ball
 
     dt = 0
@@ -101,15 +101,11 @@ def main():
         if keys[pygame.K_s]:
             player.move_down(dt)
         
-        if keys[pygame.K_KP4]:
+        if my_ball.position.x < player2.position.x: # if the ball is left of the cpu, cpu moves left
             player2.move_left(dt)
-        if keys[pygame.K_KP6]:
+        if my_ball.position.x > player2.position.x: # if the ball is to the right, cpu moves right
             player2.move_right(dt)
-        if keys[pygame.K_KP8]:
-            player2.move_up(dt)
-        if keys[pygame.K_KP5]:
-            player2.move_down(dt)
-
+        
         #CLAMP PLAYER BEFORE DRAW
         left = my_game_court.game_court.left + player.radius + border_w
         right = my_game_court.game_court.right - player.radius - border_w
